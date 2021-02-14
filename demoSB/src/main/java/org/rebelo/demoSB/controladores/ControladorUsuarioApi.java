@@ -32,12 +32,7 @@ public class ControladorUsuarioApi {
 		this.repositorioUsuario = repositorioUsuario;
 		this.codificadorDeSenha = codificadorDeSenha;
 	}
-
-	@GetMapping("/")
-	public String raiz() {
-		return "";
-	}
-
+	
 	@GetMapping("/listar")
 	// somente Administradores podem listar os usuarios
 	@PreAuthorize("hasAuthority('ADMIN')") 

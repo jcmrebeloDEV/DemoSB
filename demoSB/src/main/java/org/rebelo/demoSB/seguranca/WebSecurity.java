@@ -36,7 +36,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers("/veiculos/listar/").permitAll()
                 .antMatchers("/veiculos/listarporusuario/**").permitAll()
                 .antMatchers("/veiculos/buscar/**").permitAll()
-                .antMatchers("/veiculos/pesquisar/**").permitAll()
+                .antMatchers("/veiculos/pesquisarpormodelo/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll() //para usar o console do DB H2
                 .anyRequest().authenticated()
                 .and()

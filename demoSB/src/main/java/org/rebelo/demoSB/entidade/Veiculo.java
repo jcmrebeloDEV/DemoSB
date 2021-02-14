@@ -2,6 +2,7 @@ package org.rebelo.demoSB.entidade;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -53,6 +54,8 @@ public class Veiculo  implements Serializable{
 	 @NotNull
 	 @Size(min=2, max=500)
 	 String descricao;
+	 
+	 LocalDateTime dataDeCadastro;
 
 	public long getId() {
 		return id;
@@ -109,6 +112,14 @@ public class Veiculo  implements Serializable{
 	public void setDescricao(String descricao) {
 		this.descricao = descricao;
 	}
+	
+	public LocalDateTime getDataDeCadastro() {
+		return dataDeCadastro;
+	}
+
+	public void setDataDeCadastro(LocalDateTime dataDeCadastro) {
+		this.dataDeCadastro = dataDeCadastro;
+	}
 	 
 	public VeiculoDTO toVeiculoDTO() {
 		
@@ -116,6 +127,7 @@ public class Veiculo  implements Serializable{
 		
 		veiculoDTO.setId(this.getId());
 		veiculoDTO.setAno(this.getAno());
+		veiculoDTO.setDataDeCadastro(this.getDataDeCadastro());
 		veiculoDTO.setMarca(this.getMarca());
 		veiculoDTO.setPreco(this.getPreco());
 		veiculoDTO.setModelo(this.getModelo());
@@ -126,5 +138,7 @@ public class Veiculo  implements Serializable{
 		return veiculoDTO;
 		
 	}
+
+	
 
 }

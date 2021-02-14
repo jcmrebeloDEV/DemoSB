@@ -1,6 +1,7 @@
 package org.rebelo.demoSB.DTO;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.rebelo.demoSB.entidade.Contato;
@@ -23,6 +24,8 @@ public class VeiculoDTO {
 	 BigDecimal preco;
 	
 	 String descricao;
+	 
+     LocalDateTime dataDeCadastro;
 
 	public long getId() {
 		return id;
@@ -86,6 +89,14 @@ public class VeiculoDTO {
 
 	public void setNomeDoAnunciante(String nomeDoAnunciante) {
 		this.nomeDoAnunciante = nomeDoAnunciante;
+	}
+
+	public LocalDateTime getDataDeCadastro() {
+		return dataDeCadastro;
+	}
+
+	public void setDataDeCadastro(LocalDateTime dataDeCadastro) {
+		this.dataDeCadastro = dataDeCadastro;
 	}
 
 }

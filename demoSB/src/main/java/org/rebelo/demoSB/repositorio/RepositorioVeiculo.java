@@ -10,11 +10,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RepositorioVeiculo extends JpaRepository<Veiculo, Long> {
-	
+
 	@Query(value = "select v from Veiculo v where v.usuario.cpf = ?1", nativeQuery = false)
 	List<Veiculo> listarPorUsuario(String cpf);
-    
-	List<Veiculo> findByDescricaoContainingIgnoreCase(String query);
-	
-	
+
+	List<Veiculo> findByModeloContainingIgnoreCase(String query);
+
 }

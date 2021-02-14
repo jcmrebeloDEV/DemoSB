@@ -2,14 +2,17 @@ package org.rebelo.demoSB.seguranca;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.server.ResponseStatusException;
 import org.rebelo.demoSB.seguranca.Constantes;
 
 import javax.servlet.FilterChain;
@@ -23,52 +26,65 @@ import java.util.stream.Collectors;
 public class FiltroAutorizadorJWT extends BasicAuthenticationFilter {
 
 	public FiltroAutorizadorJWT(AuthenticationManager authManager) {
-        super(authManager);
-    }
-	
-	  @Override
-	    protected void doFilterInternal(HttpServletRequest req,
-	                                    HttpServletResponse res,
-	                                    FilterChain chain) throws IOException, ServletException {
-	        String header = req.getHeader(Constantes.HEADER_STRING);
+		super(authManager);
+	}
 
-	        if (header == null || !header.startsWith(Constantes.TOKEN_PREFIX)) {
-	            chain.doFilter(req, res);
-	            return;
-	        }
+	@Override
+	protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+			throws IOException, ServletException {
+		String header = req.getHeader(Constantes.HEADER_STRING);
 
-	        UsernamePasswordAuthenticationToken authentication = this.getAuthentication(req);
+		if (header == null || !header.startsWith(Constantes.TOKEN_PREFIX)) {
+			chain.doFilter(req, res);
+			return;
+		}
 
-	        SecurityContextHolder.getContext().setAuthentication(authentication);
-	        chain.doFilter(req, res);
-	    }
-	
-	
-	  private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
-	       
-		  String token = request.getHeader(Constantes.HEADER_STRING);
-	        if (token != null) {
-	           //decodifica o token JWT
-	        	
-	        	DecodedJWT jwt = JWT.require(Algorithm.HMAC512(Constantes.SECRET.getBytes()))
-	                    .build()
-	                    .verify(token.replace(Constantes.TOKEN_PREFIX, ""));
-	        	
-	        	String user = jwt.getSubject();
-	        		        		        	
-	        	List<GrantedAuthority> autoridades = jwt.getClaim(Constantes.TOKEN_PREFIX_AUTORIDADES).asList(String.class)
-	        			.stream().map(s -> new SimpleGrantedAuthority(s)).collect(Collectors.toList());
-	        	
-	   
-	            if (user != null) {
-	            	
-	            //autoridades.forEach(a -> System.out.print("AUTORIDADES LOGIN:   "+a.getAuthority()));
-	            	
-	                return new UsernamePasswordAuthenticationToken(user, null, autoridades/*new ArrayList<>()*/);
-	            }
-	            return null;
-	        }
-	        return null;
-	    }
-	  
+		UsernamePasswordAuthenticationToken authentication = this.getAuthentication(req);
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		chain.doFilter(req, res);
+	}
+
+	private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
+
+		String token = request.getHeader(Constantes.HEADER_STRING);
+
+		if (token != null) {
+
+			/*
+			 * tenta decodificar o token JWT; Se for inválido ou estiver expirado, lança uma
+			 * exceção
+			 * 
+			 */
+
+			try {
+
+				DecodedJWT jwt = JWT.require(Algorithm.HMAC512(Constantes.SECRET.getBytes())).build()
+						.verify(token.replace(Constantes.TOKEN_PREFIX, ""));
+
+				String user = jwt.getSubject();
+
+				List<GrantedAuthority> autoridades = jwt.getClaim(Constantes.TOKEN_PREFIX_AUTORIDADES)
+						.asList(String.class).stream().map(s -> new SimpleGrantedAuthority(s))
+						.collect(Collectors.toList());
+
+				if (user != null) {
+
+					// autoridades.forEach(a -> System.out.print("AUTORIDADES LOGIN:
+					// "+a.getAuthority()));
+
+					return new UsernamePasswordAuthenticationToken(user, null, autoridades/* new ArrayList<>() */);
+				}
+				return null;
+
+			} catch (JWTVerificationException exception) {
+
+				throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Token inválido");
+
+			}
+
+		}
+		return null;
+	}
+
 }
