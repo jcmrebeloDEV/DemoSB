@@ -59,7 +59,7 @@ public class ControladorVeiculoApi {
 
 	@GetMapping("/pesquisarpormodelo/{query}")
 	@ResponseBody
-	public List<VeiculoDTO> pesquisar(@PathVariable String query) {
+	public List<VeiculoDTO> pesquisarpormodelo(@PathVariable String query) {
 
 		return this.repositorioVeiculo.findByModeloContainingIgnoreCase(query).stream()
 				.map(veiculo -> veiculo.toVeiculoDTO()).collect(Collectors.toList());

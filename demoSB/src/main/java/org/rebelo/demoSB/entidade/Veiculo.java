@@ -132,7 +132,8 @@ public class Veiculo  implements Serializable{
 		veiculoDTO.setPreco(this.getPreco());
 		veiculoDTO.setModelo(this.getModelo());
 		veiculoDTO.setDescricao(this.getDescricao());
-		veiculoDTO.setContatos(this.getUsuario().getContatosAdicionais());
+		veiculoDTO.setContatoPrincipal(this.getUsuario().getEmail());
+		veiculoDTO.setContatosAdicionais(this.getUsuario().getContatosAdicionais());
 		veiculoDTO.setNomeDoAnunciante(this.getUsuario().getNome());
 		
 		return veiculoDTO;

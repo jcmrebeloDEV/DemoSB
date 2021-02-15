@@ -13,7 +13,9 @@ public class VeiculoDTO {
 	
 	private String nomeDoAnunciante;
 	
-	private List<Contato> contatos;
+	private String contatoPrincipal;
+	
+	private List<Contato> contatosAdicionais;
 	
 	 Marca marca;
 	
@@ -35,12 +37,12 @@ public class VeiculoDTO {
 		this.id = id;
 	}
 
-	public List<Contato> getContatos() {
-		return contatos;
+	public List<Contato> getContatosAdicionais() {
+		return contatosAdicionais;
 	}
 
-	public void setContatos(List<Contato> contatos) {
-		this.contatos = contatos;
+	public void setContatosAdicionais(List<Contato> contatos) {
+		this.contatosAdicionais = contatos;
 	}
 
 	public Marca getMarca() {
@@ -97,6 +99,14 @@ public class VeiculoDTO {
 
 	public void setDataDeCadastro(LocalDateTime dataDeCadastro) {
 		this.dataDeCadastro = dataDeCadastro;
+	}
+
+	public String getContatoPrincipal() {
+		return contatoPrincipal;
+	}
+
+	public void setContatoPrincipal(String contatoPrincipal) {
+		this.contatoPrincipal = contatoPrincipal;
 	}
 
 }
