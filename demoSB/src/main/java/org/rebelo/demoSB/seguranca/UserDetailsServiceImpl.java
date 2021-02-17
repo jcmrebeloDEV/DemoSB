@@ -27,8 +27,7 @@ import java.util.List;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
     private RepositorioUsuario repositorioUsuario;
-    private List<GrantedAuthority> autoridades = new ArrayList<GrantedAuthority>();
-
+   
     public UserDetailsServiceImpl(RepositorioUsuario repositorioUsuario) {
         this.repositorioUsuario = repositorioUsuario;
     }
@@ -36,6 +35,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
        
+    	List<GrantedAuthority> autoridades = new ArrayList<GrantedAuthority>();
     	
     	//A propriedade "username" usada é o cpf do usuário
     	Usuario usuario = repositorioUsuario.findById(username).get(); 
@@ -48,7 +48,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         	autoridades.add(new SimpleGrantedAuthority("ADMIN"));
        }
         
-        return new User(usuario.getCpf(), usuario.getSenha(), this.autoridades);
+        return new User(usuario.getCpf(), usuario.getSenha(), autoridades);
     }
     
     

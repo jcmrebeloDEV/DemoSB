@@ -37,10 +37,19 @@ public class DemoSbApplication {
 			BCryptPasswordEncoder bCryptPasswordEncoder){
 		
 		 return args -> {
-			 String cpf = "74018276036";
+			 			 
+			    Usuario admin = new Usuario();
+			    admin.setCpf("67681905049");
+			    admin.setAdmin(true);
+			    admin.setEmail("admin@admin.com");
+			    admin.setNome("admin");
+			    admin.setSenha(bCryptPasswordEncoder.encode("12345678"));
+			    admin.setNascimento(LocalDate.parse("1980-03-01"));
 
+			    repositorioUsuario.save(admin);
+			 
 				Usuario u = new Usuario();
-				u.setCpf(cpf);
+				u.setCpf("74018276036");
 				u.setAdmin(false);
 				u.setEmail("email@email.com");
 				u.setNome("Usuario de Teste 1");
@@ -60,22 +69,22 @@ public class DemoSbApplication {
 				repositorioUsuario.save(u);
 				
 				Veiculo v1 = new Veiculo();
-				v1.setUsuario(repositorioUsuario.findById(cpf).get());
-				v1.setModelo("Roadster");
+				v1.setUsuario(repositorioUsuario.findById("74018276036").get());
+				v1.setModelo("SLK Roadster");
 				v1.setMarca(Marca.MERCEDES);
 				v1.setAno(2007);
-				v1.setDescricao("carro bacana, turbo!");
+				v1.setDescricao("Carro bacana, turbo! Em excelente estado de conservação.");
 				v1.setDataDeCadastro(LocalDateTime.now());
 				v1.setPreco(BigDecimal.valueOf(75000.00));
 
 				repositorioVeiculo.save(v1);
 				
 				Veiculo v2 = new Veiculo();
-				v2.setUsuario(repositorioUsuario.findById(cpf).get());
+				v2.setUsuario(repositorioUsuario.findById("74018276036").get());
 				v2.setModelo("328i");
 				v2.setMarca(Marca.BMW);
 				v2.setAno(2007);
-				v2.setDescricao("carro legal");
+				v2.setDescricao("Carro legal,teto solar, todo revisado em oficina credenciada");
 				v2.setDataDeCadastro(LocalDateTime.now());
 				v2.setPreco(BigDecimal.valueOf(75000.00));
 
