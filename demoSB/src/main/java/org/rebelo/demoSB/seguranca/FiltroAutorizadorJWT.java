@@ -4,15 +4,13 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-
-import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.web.server.ResponseStatusException;
 import org.rebelo.demoSB.seguranca.Constantes;
 
 import javax.servlet.FilterChain;
@@ -24,10 +22,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class FiltroAutorizadorJWT extends BasicAuthenticationFilter {
+	
+	private AccessDeniedHandlerJWT accessDeniedHandlerJWT;
 
-	public FiltroAutorizadorJWT(AuthenticationManager authManager) {
+	public FiltroAutorizadorJWT(AuthenticationManager authManager, AccessDeniedHandlerJWT accessDeniedHandlerJWT) {
 		super(authManager);
+	this.accessDeniedHandlerJWT = accessDeniedHandlerJWT;
 	}
+	
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
@@ -38,11 +40,18 @@ public class FiltroAutorizadorJWT extends BasicAuthenticationFilter {
 			chain.doFilter(req, res);
 			return;
 		}
+		
+		try {
 
 		UsernamePasswordAuthenticationToken authentication = this.getAuthentication(req);
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		chain.doFilter(req, res);
+		}catch(Exception e) {
+			
+			accessDeniedHandlerJWT.handle(req, res, new AccessDeniedException(e.getLocalizedMessage(), e));
+			
+		}
 	}
 
 	private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
@@ -79,8 +88,7 @@ public class FiltroAutorizadorJWT extends BasicAuthenticationFilter {
 
 			} catch (JWTVerificationException exception) {
 
-				throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Token inválido");
-
+				throw new AccessDeniedException("");
 			}
 
 		}

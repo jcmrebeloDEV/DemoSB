@@ -6,6 +6,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -36,18 +38,24 @@ public class FiltroAutenticadorJWT extends UsernamePasswordAuthenticationFilter 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
 			throws AuthenticationException {
-		try {
-			Usuario creds = new ObjectMapper().readValue(req.getInputStream(), Usuario.class);
+		
+			try {
+				Usuario credenciais = new ObjectMapper().readValue(req.getInputStream(), Usuario.class);
+				
+				return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+						credenciais.getCpf(),  /* username (no caso o cpf) */
+						credenciais.getSenha(), /* senha  */
+						new ArrayList<>()) /*lista vazia (apenas username e senha sao fornecidas no login)*/
+				       );
+				
+			} catch (IOException e) {
+				
+				throw new AuthenticationCredentialsNotFoundException("", e);
+				//return null;
+			}
 
-			return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-					creds.getCpf(),  // username (no caso o cpf)
-					creds.getSenha(), // senha
-					new ArrayList<>()) // lista vazia (apenas username e senha sao fornecidas no login)
-			);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+			
+			}
 
 	@Override
 	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
@@ -56,7 +64,8 @@ public class FiltroAutenticadorJWT extends UsernamePasswordAuthenticationFilter 
 		try {
 
 			// obtem a lista de autoridades como um array de strings
-			String[] autoridades = auth.getAuthorities().stream().map(a -> a.getAuthority()).toArray(String[]::new);
+			String[] autoridades = auth.getAuthorities().stream()
+					.map(a -> a.getAuthority()).toArray(String[]::new);
 
 			String token = JWT.create().withSubject(((User) auth.getPrincipal()).getUsername())
 					.withArrayClaim(Constantes.TOKEN_PREFIX_AUTORIDADES, autoridades)

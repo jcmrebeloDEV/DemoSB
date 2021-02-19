@@ -20,10 +20,12 @@ import org.springframework.context.annotation.Configuration;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled=true)  //para poder usar a  anotação @PreAuthorize
 public class WebSecurity extends WebSecurityConfigurerAdapter {
-    private UserDetailsServiceImpl detalhesDoUsuario;
+    
+	private UserDetailsServiceImpl detalhesDoUsuario;
     private BCryptPasswordEncoder codificadorDeSenha;
-
-    public WebSecurity(UserDetailsServiceImpl detalhesDoUsuario, BCryptPasswordEncoder codificadorDeSenha) {
+   	
+    public WebSecurity(UserDetailsServiceImpl detalhesDoUsuario, BCryptPasswordEncoder codificadorDeSenha,
+    		AuthenticationEntryPointJWT authenticationEntryPointJWT) {
         this.detalhesDoUsuario = detalhesDoUsuario;
         this.codificadorDeSenha = codificadorDeSenha;
     }
@@ -38,10 +40,10 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers("/veiculos/buscar/**").permitAll()
                 .antMatchers("/veiculos/pesquisarpormodelo/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll() //para usar o console do DB H2
-                .anyRequest().authenticated()
-                .and()
+                .anyRequest().authenticated().and()
                 .addFilter(new FiltroAutenticadorJWT(authenticationManager()))
-                .addFilter(new FiltroAutorizadorJWT(authenticationManager()))
+                .exceptionHandling().authenticationEntryPoint(new AuthenticationEntryPointJWT()).and()
+                .addFilter(new FiltroAutorizadorJWT(authenticationManager(), new AccessDeniedHandlerJWT()))
                 // desabilita a criação de sessao (modo stateless)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
