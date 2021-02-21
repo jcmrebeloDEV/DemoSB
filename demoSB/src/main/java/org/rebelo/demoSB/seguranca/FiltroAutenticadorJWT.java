@@ -72,17 +72,13 @@ public class FiltroAutenticadorJWT extends UsernamePasswordAuthenticationFilter 
 					.withExpiresAt(new Date(System.currentTimeMillis() + Constantes.EXPIRATION_TIME))
 					.sign(Algorithm.HMAC512(Constantes.SECRET.getBytes()));
 
-			// String body = ((Usuario) auth.getPrincipal()).getUserName() + " " + token;
-			// auth.getAuthorities().forEach(a -> System.out.print("AUTORIDADES PARA TOKEN:
-			// "+a.getAuthority()));
-
 			res.addHeader(Constantes.HEADER_STRING, Constantes.TOKEN_PREFIX + token);
 
-			// res.getWriter().write(body);
+			// res.getWriter().write(((Usuario) auth.getPrincipal()).getUserName() + " " + token);
 			// res.getWriter().flush();
 
 		} catch (JWTCreationException exception) {
-
+		
 		}
 
 	}

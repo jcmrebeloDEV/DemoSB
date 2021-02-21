@@ -1,7 +1,11 @@
 package org.rebelo.demoSB.controladores;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,13 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.rebelo.demoSB.repositorio.*;
-
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
+
 
 import javax.validation.Valid;
 
@@ -35,19 +39,46 @@ public class ControladorVeiculoApi {
 		this.repositorioUsuario = repositorioUsuario;
 	}
 
-	public RepositorioVeiculo getRepositorioVeiculo() {
-		return this.repositorioVeiculo;
+	public boolean verificaSeVeiculoPertenceUsuario(long idVeiculo, String cpfDoUsuarioLogado) {
+
+		Optional<Veiculo> opVeic = this.repositorioVeiculo.findById(idVeiculo);
+		
+		if (opVeic.isPresent()) {
+
+			return cpfDoUsuarioLogado.equals(opVeic.get().getUsuario().getCpf());
+
+		}
+
+		return false;
 	}
+
+	/*
+	 * //@GetMapping("/listar") //@ResponseBody public List<VeiculoDTO> listar() {
+	 * 
+	 * return this.repositorioVeiculo.findAll().stream().map(veiculo ->
+	 * veiculo.toVeiculoDTO()) .collect(Collectors.toList());
+	 * 
+	 * }
+	 */
 
 	@GetMapping("/listar")
 	@ResponseBody
-	public List<VeiculoDTO> listar() {
+	public ResponseEntity<Page<VeiculoDTO>> listar(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "1") int size) {
 
-		return this.repositorioVeiculo.findAll().stream().map(veiculo -> veiculo.toVeiculoDTO())
-				.collect(Collectors.toList());
+		if (page < 0 || size < 1)
+			return ResponseEntity.badRequest().build();
+		
+		Page<VeiculoDTO> pagina = this.repositorioVeiculo
+				.findAll(PageRequest.of(page, size, Sort.by("modelo")))
+				.map(v->v.toVeiculoDTO());
+
+
+		return ResponseEntity.ok().body(pagina);
 
 	}
 
+	/*
 	@GetMapping("/listarporusuario/{cpf}")
 	@ResponseBody
 	public List<VeiculoDTO> listarPorUsuario(@PathVariable String cpf) {
@@ -56,7 +87,26 @@ public class ControladorVeiculoApi {
 				.collect(Collectors.toList());
 
 	}
+	*/
+	
+	@GetMapping("/listarporusuario/{cpf}")
+	@ResponseBody
+	public ResponseEntity<Page<VeiculoDTO>>  listarPorUsuario(@PathVariable String cpf, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "1") int size) {
 
+		if (page < 0 || size < 1)
+			return ResponseEntity.badRequest().build();
+		
+		Page<VeiculoDTO> pagina = this.repositorioVeiculo
+				.listarPorUsuario(cpf,PageRequest.of(page, size, Sort.by("modelo")))
+				.map(v->v.toVeiculoDTO());
+
+
+		return ResponseEntity.ok().body(pagina);
+
+	}
+
+	/*
 	@GetMapping("/pesquisarpormodelo/{query}")
 	@ResponseBody
 	public List<VeiculoDTO> pesquisarpormodelo(@PathVariable String query) {
@@ -64,6 +114,23 @@ public class ControladorVeiculoApi {
 		return this.repositorioVeiculo.findByModeloContainingIgnoreCase(query).stream()
 				.map(veiculo -> veiculo.toVeiculoDTO()).collect(Collectors.toList());
 
+	}
+	
+	*/
+	@GetMapping("/pesquisarpormodelo/{query}")
+	@ResponseBody
+	public ResponseEntity<Page<VeiculoDTO>> pesquisarpormodelo(@PathVariable String query,  @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "1") int size) {
+		
+		if (page < 0 || size < 1)
+			return ResponseEntity.badRequest().build();
+		
+		Page<VeiculoDTO> pagina = this.repositorioVeiculo
+				.findByModeloContainingIgnoreCase(query,PageRequest.of(page, size, Sort.by("modelo")))
+				.map(v->v.toVeiculoDTO());
+
+
+		return ResponseEntity.ok().body(pagina);
 	}
 
 	@GetMapping("/buscar/{id}")
@@ -73,16 +140,18 @@ public class ControladorVeiculoApi {
 				.orElse(ResponseEntity.notFound().build());
 	}
 
-	@PostMapping("/criar/{cpf}")
+	@PostMapping("/criar")
 	/*
 	 * Os anúncios podem ser criados/modificados/excluidos apenas pelo usuário
-	 * proprietário ou por administradores. Lembrando que a propriedade
-	 * authentication.name é o cpf do usuário logado
+	 * proprietário ou administradores. Lembrando que a
+	 * propriedade authentication.name é o cpf do usuário logado
 	 */
-	@PreAuthorize("hasAuthority('ADMIN')  or #cpf == authentication.name")
-	public VeiculoDTO criar(@PathVariable String cpf, @Valid @RequestBody Veiculo veic) {
+	@PreAuthorize("isAuthenticated()")
+	public VeiculoDTO criar(Authentication authentication, @Valid @RequestBody Veiculo veic) {
+				
+		String cpfDoUsuario = authentication.getName();
 
-		Usuario usr = this.repositorioUsuario.findById(cpf).get();
+		Usuario usr = this.repositorioUsuario.findById(cpfDoUsuario).get();
 
 		veic.setUsuario(usr);
 		veic.setDataDeCadastro(LocalDateTime.now());
@@ -92,8 +161,7 @@ public class ControladorVeiculoApi {
 	}
 
 	@PutMapping("/atualizar/{id}")
-	@PreAuthorize("hasAuthority('ADMIN')  or "
-			+ "this.getRepositorioVeiculo().findById(#id).get().getUsuario().getCpf() == authentication.name")
+	@PreAuthorize("hasAuthority('ADMIN') or this.verificaSeVeiculoPertenceUsuario(#id, authentication.name)")
 	public ResponseEntity<VeiculoDTO> atualizar(@PathVariable long id, @Valid @RequestBody Veiculo veiculo) {
 
 		return this.repositorioVeiculo.findById(id).map(registrOriginal -> {
@@ -112,8 +180,7 @@ public class ControladorVeiculoApi {
 	}
 
 	@DeleteMapping(path = { "/excluir/{id}" })
-	@PreAuthorize("hasAuthority('ADMIN')  or "
-			+ "this.getRepositorioVeiculo().findById(#id).get().getUsuario().getCpf() == authentication.name")
+	@PreAuthorize("hasAuthority('ADMIN') or this.verificaSeVeiculoPertenceUsuario(#id, authentication.name)")
 	public ResponseEntity<?> excluir(@PathVariable long id) {
 		return this.repositorioVeiculo.findById(id).map(record -> {
 			this.repositorioVeiculo.deleteById(id);

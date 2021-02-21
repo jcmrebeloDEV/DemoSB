@@ -13,47 +13,32 @@ import org.rebelo.demoSB.entidade.Usuario;
 
 import java.util.ArrayList;
 import java.util.List;
- 
-/*
- * O Spring security usa internamente o objeto UserDetails retornado para
- * verificar a senha e username contra os valores fornecidos no login
- * 
- * 
- * NOTA: Aqui a propriedade username usada é o próprio cpf (que é identificador único)
- * do usuário. Poderia ser qualquer outro identificador único,
- * como o próprio atributo padrão "username".
- */
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-    private RepositorioUsuario repositorioUsuario;
-   
-    public UserDetailsServiceImpl(RepositorioUsuario repositorioUsuario) {
-        this.repositorioUsuario = repositorioUsuario;
-    }
+	private RepositorioUsuario repositorioUsuario;
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-       
-    	List<GrantedAuthority> autoridades = new ArrayList<GrantedAuthority>();
-    	
-    	//A propriedade "username" usada é o cpf do usuário
-    	Usuario usuario = repositorioUsuario.findById(username).get(); 
-    	
-        if (usuario == null) {
-            throw new UsernameNotFoundException(username);
-        }
-        
-        if (usuario.isAdmin()) {
-        	autoridades.add(new SimpleGrantedAuthority("ADMIN"));
-       }
-        
-        return new User(usuario.getCpf(), usuario.getSenha(), autoridades);
-    }
-    
-    
-  
-    
-    
-    
+	public UserDetailsServiceImpl(RepositorioUsuario repositorioUsuario) {
+		this.repositorioUsuario = repositorioUsuario;
+	}
+
+	/*
+	 * NOTA: Aqui a propriedade username usada é o próprio cpf (que é identificador único)
+	 * do usuário. Poderia ser qualquer outro identificador único,
+	 * como o próprio atributo "username".
+	 */
+	@Override
+	public UserDetails loadUserByUsername(String cpf) throws UsernameNotFoundException {
+
+		List<GrantedAuthority> autoridades = new ArrayList<GrantedAuthority>();
+
+		Usuario usuario = repositorioUsuario.findById(cpf)
+				.orElseThrow(() -> new UsernameNotFoundException(cpf));
+
+		if (usuario.isAdmin())
+			autoridades.add(new SimpleGrantedAuthority("ADMIN"));
+
+		return new User(usuario.getCpf(), usuario.getSenha(), autoridades);
+	}
+
 }

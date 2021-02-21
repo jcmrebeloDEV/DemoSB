@@ -47,7 +47,8 @@ public class FiltroAutorizadorJWT extends BasicAuthenticationFilter {
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		chain.doFilter(req, res);
-		}catch(Exception e) {
+		
+		}catch(AccessDeniedException e) {
 			
 			accessDeniedHandlerJWT.handle(req, res, new AccessDeniedException(e.getLocalizedMessage(), e));
 			
@@ -62,7 +63,7 @@ public class FiltroAutorizadorJWT extends BasicAuthenticationFilter {
 
 			/*
 			 * tenta decodificar o token JWT; Se for inválido ou estiver expirado, lança uma
-			 * exceção
+			 * exceção JWTVerificationException
 			 * 
 			 */
 
@@ -70,21 +71,17 @@ public class FiltroAutorizadorJWT extends BasicAuthenticationFilter {
 
 				DecodedJWT jwt = JWT.require(Algorithm.HMAC512(Constantes.SECRET.getBytes())).build()
 						.verify(token.replace(Constantes.TOKEN_PREFIX, ""));
-
-				String user = jwt.getSubject();
-
+				
 				List<GrantedAuthority> autoridades = jwt.getClaim(Constantes.TOKEN_PREFIX_AUTORIDADES)
 						.asList(String.class).stream().map(s -> new SimpleGrantedAuthority(s))
 						.collect(Collectors.toList());
 
+				String user = jwt.getSubject();
+				
 				if (user != null) {
-
-					// autoridades.forEach(a -> System.out.print("AUTORIDADES LOGIN:
-					// "+a.getAuthority()));
-
-					return new UsernamePasswordAuthenticationToken(user, null, autoridades/* new ArrayList<>() */);
-				}
-				return null;
+					return new UsernamePasswordAuthenticationToken(user, null, autoridades);
+				} else { 
+					return null;}
 
 			} catch (JWTVerificationException exception) {
 
@@ -92,6 +89,7 @@ public class FiltroAutorizadorJWT extends BasicAuthenticationFilter {
 			}
 
 		}
+		
 		return null;
 	}
 
