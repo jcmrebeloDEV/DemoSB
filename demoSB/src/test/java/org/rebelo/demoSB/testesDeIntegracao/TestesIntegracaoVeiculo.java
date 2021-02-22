@@ -8,7 +8,6 @@ import org.rebelo.demoSB.repositorio.RepositorioVeiculo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -76,7 +75,7 @@ public class TestesIntegracaoVeiculo {
 		String token = obterTokenJWT(cpf, senha);
 		
 
-			mockMvc.perform(post("/veiculos/criar/{cpf}", cpf)
+			mockMvc.perform(post("/veiculos/criar/", cpf)
 			.header("Authorization", token)
 			.contentType("application/json")
 			.content(objectMapper.writeValueAsString(geraVeiculo())))
@@ -89,19 +88,11 @@ public class TestesIntegracaoVeiculo {
 	
 	@Test
 	public void testeControladorVeiculo_Criar_NAO_Autorizado() throws Exception {
-
-		String cpf = "74018276036";
-		String senha = "12345678";
-		
-		String token = obterTokenJWT(cpf, senha);
-		
-		String cpf_de_outro_usuario = "29367483058";
 						
-			mockMvc.perform(post("/veiculos/criar/{cpf}", cpf_de_outro_usuario)
-			.header("Authorization", token)
+			mockMvc.perform(post("/veiculos/criar/")
 			.contentType("application/json")
 			.content(objectMapper.writeValueAsString(geraVeiculo())))
-			.andExpect(status().isForbidden())
+			.andExpect(status().isUnauthorized())
 			.andReturn();
 
 	}
@@ -109,15 +100,15 @@ public class TestesIntegracaoVeiculo {
 	@Test
 	public void testeControladorVeiculo_Listar() throws Exception {
 
-		Veiculo v = repositorioVeiculo.findById((long) 2).get(); // primeiro registro de veiculo no BD
+		Veiculo v = repositorioVeiculo.findById((long) 3).get(); // primeiro registro de veiculo no BD
 
 		int numeroRegistros =(int) repositorioVeiculo.count();
 		
-		mockMvc.perform(get("/veiculos/listar/"))
+		mockMvc.perform(get("/veiculos/listar/?page=0&size={size}",numeroRegistros))//uma pagina com todos os registros
 		.andExpect(status().isOk())
 		.andExpect(content().contentType("application/json"))
-		.andExpect(jsonPath("$", hasSize(numeroRegistros)))
-		.andExpect(jsonPath("$[0].modelo", is(v.getModelo())))
+		.andExpect(jsonPath("$.content", hasSize(numeroRegistros)))
+		.andExpect(jsonPath("$.content[0].modelo", is(v.getModelo())))
 		.andReturn();
 
 	}
@@ -125,11 +116,11 @@ public class TestesIntegracaoVeiculo {
 	@Test
 	public void testeControladorVeiculo_PesquisarPorModelo() throws Exception {
 
-		mockMvc.perform(get("/veiculos/pesquisarpormodelo/{query}", "roadster"))
+		mockMvc.perform(get("/veiculos/pesquisarpormodelo/{query}/?page=0&size=1", "One"))
 		.andExpect(status().isOk())
 		.andExpect(content().contentType("application/json"))
-		.andExpect(jsonPath("$", hasSize(1)))
-		.andExpect(jsonPath("$[0].marca", is(Marca.MERCEDES.toString())))
+		.andExpect(jsonPath("$.content", hasSize(1)))
+		.andExpect(jsonPath("$.content[0].marca", is(Marca.MINI.toString())))
 		.andReturn();
 
 	}

@@ -2,10 +2,7 @@ package org.rebelo.demoSB.testesDeIntegracao;
 
 import org.junit.jupiter.api.Test;
 import org.rebelo.demoSB.entidade.Usuario;
-import org.rebelo.demoSB.entidade.Veiculo;
-import org.rebelo.demoSB.entidade.Enum.Marca;
 import org.rebelo.demoSB.repositorio.RepositorioUsuario;
-import org.rebelo.demoSB.repositorio.RepositorioVeiculo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,14 +10,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 import static org.hamcrest.Matchers.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.rebelo.demoSB.repositorio.RepositorioUsuario;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -68,15 +59,39 @@ public class TestesIntegracaoUsuario {
 		
 		String token_com_privilegio_Administrador = obterTokenJWT(cpf, senha);
 									
-			mockMvc.perform(get("/usuarios/listar/")
+			mockMvc.perform(get("/usuarios/listar/?page=0&size={size}",numeroRegistros)//uma pagina com todos os registros
 		   .header("Authorization", token_com_privilegio_Administrador)			
 		   .contentType("application/json"))
 			.andExpect(status().isOk())
 			.andExpect(content().contentType("application/json"))
-			.andExpect(jsonPath("$", hasSize(numeroRegistros)))
+			.andExpect(jsonPath("$.content", hasSize(numeroRegistros)))
+			.andExpect(jsonPath("$.last", is(true)))
 			.andReturn();
 				
 	}
+	
+	
+	@Test
+	public void testeControladorUsuario_PesquisarPorNome() throws Exception {
+		
+		//apenas administradores podem acessar a lista de usuários
+			
+		String cpf = "67681905049"; //cpf de um Administrador
+		String senha = "12345678";
+		
+		String token_com_privilegio_Administrador = obterTokenJWT(cpf, senha);
+									
+			mockMvc.perform(get("/usuarios/pesquisarpornome/{nome}/?page=0&size=1","ste")//pagina com todos os registros
+		   .header("Authorization", token_com_privilegio_Administrador)			
+		   .contentType("application/json"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType("application/json"))
+			.andExpect(jsonPath("$.content", hasSize(1))) //retorna "usuario de teste 1"
+			.andExpect(jsonPath("$.last", is(true)))
+			.andReturn();
+				
+	}
+	
 	
 	@Test
 	public void testeControladorUsuario_Listar_NAO_Autorizado() throws Exception {

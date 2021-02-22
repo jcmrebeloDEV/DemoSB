@@ -1,5 +1,8 @@
 package org.rebelo.demoSB.controladores;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -10,14 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.rebelo.demoSB.repositorio.RepositorioUsuario;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import javax.validation.Valid;
-
 import org.rebelo.demoSB.DTO.UsuarioDTO;
 import org.rebelo.demoSB.entidade.*;
 
@@ -37,24 +37,42 @@ public class ControladorUsuarioApi {
 	// somente Administradores podem listar os usuarios
 	@PreAuthorize("hasAuthority('ADMIN')") 
 	@ResponseBody
-	public List<UsuarioDTO> listar() {
+	public ResponseEntity<Page<UsuarioDTO>> listar(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "1") int size) {
 
-		/*
-		 * SecurityContext securityContext = SecurityContextHolder.getContext();
-		 * securityContext.getAuthentication().getAuthorities() .forEach(s ->
-		 * System.out.print("METODO:    "+s.getAuthority()));
-		 */
+		if (page < 0 || size < 1)
+			return ResponseEntity.badRequest().build();
+		
+		Page<UsuarioDTO> pagina = this.repositorioUsuario
+				.findAll(PageRequest.of(page, size, Sort.by("nome").descending()))
+				.map(u->u.toUsuarioDTO());
 
-		return this.repositorioUsuario.findAll().stream().map(usuario -> usuario.toUsuarioDTO())
-				.collect(Collectors.toList());
+
+		return ResponseEntity.ok().body(pagina);
 
 	}
+	
+	@GetMapping("/pesquisarpornome/{query}")
+	@ResponseBody
+	public ResponseEntity<Page<UsuarioDTO>> pesquisarPorNome(@PathVariable String query,  @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "1") int size) {
+		
+		if (page < 0 || size < 1)
+			return ResponseEntity.badRequest().build();
+		
+		Page<UsuarioDTO> pagina = this.repositorioUsuario
+				.findByNomeContainingIgnoreCase(query,PageRequest.of(page, size, Sort.by("nome").descending()))
+				.map(u->u.toUsuarioDTO());
 
-	@GetMapping("/buscar/{cpf}")
+
+		return ResponseEntity.ok().body(pagina);
+	}
+
 	/* 
 	 Os dados de um usuário podem ser acessados apenas por ele mesmo ou por
 	 administradores. Lembrando que a propriedade authentication.name é o cpf do usuário logado 
 	 */
+	@GetMapping("/buscar/{cpf}")
 	@PreAuthorize("hasAuthority('ADMIN')  or #cpf == authentication.name")
 	@ResponseBody
 	public ResponseEntity<UsuarioDTO> buscar(@PathVariable String cpf) {
@@ -76,6 +94,10 @@ public class ControladorUsuarioApi {
 
 	}
 
+	/* 
+	 Os dados de um usuário podem ser atualizados apenas por ele mesmo ou por
+	 administradores. Lembrando que a propriedade authentication.name é o cpf do usuário logado 
+	 */
 	@PutMapping("/atualizar/{cpf}")
 	@PreAuthorize("hasAuthority('ADMIN')  or #cpf == authentication.name")
 	public ResponseEntity<UsuarioDTO> atualizar(@PathVariable String cpf, @Valid @RequestBody Usuario usr) {
@@ -100,6 +122,10 @@ public class ControladorUsuarioApi {
 
 	}
 
+	/* 
+	 Um usuário pode ser excluido apenas por ele mesmo ou por
+	 administradores. Lembrando que a propriedade authentication.name é o cpf do usuário logado 
+	 */
 	@DeleteMapping(path = { "/excluir/{cpf}" })
 	@PreAuthorize("hasAuthority('ADMIN')  or #cpf == authentication.name")
 	public ResponseEntity<?> excluir(@PathVariable String cpf) {

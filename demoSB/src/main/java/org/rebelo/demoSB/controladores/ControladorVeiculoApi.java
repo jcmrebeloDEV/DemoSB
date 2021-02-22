@@ -78,16 +78,6 @@ public class ControladorVeiculoApi {
 
 	}
 
-	/*
-	@GetMapping("/listarporusuario/{cpf}")
-	@ResponseBody
-	public List<VeiculoDTO> listarPorUsuario(@PathVariable String cpf) {
-
-		return this.repositorioVeiculo.listarPorUsuario(cpf).stream().map(veiculo -> veiculo.toVeiculoDTO())
-				.collect(Collectors.toList());
-
-	}
-	*/
 	
 	@GetMapping("/listarporusuario/{cpf}")
 	@ResponseBody
@@ -106,20 +96,10 @@ public class ControladorVeiculoApi {
 
 	}
 
-	/*
-	@GetMapping("/pesquisarpormodelo/{query}")
-	@ResponseBody
-	public List<VeiculoDTO> pesquisarpormodelo(@PathVariable String query) {
-
-		return this.repositorioVeiculo.findByModeloContainingIgnoreCase(query).stream()
-				.map(veiculo -> veiculo.toVeiculoDTO()).collect(Collectors.toList());
-
-	}
 	
-	*/
 	@GetMapping("/pesquisarpormodelo/{query}")
 	@ResponseBody
-	public ResponseEntity<Page<VeiculoDTO>> pesquisarpormodelo(@PathVariable String query,  @RequestParam(defaultValue = "0") int page,
+	public ResponseEntity<Page<VeiculoDTO>> pesquisarPorModelo(@PathVariable String query,  @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "1") int size) {
 		
 		if (page < 0 || size < 1)
@@ -140,12 +120,14 @@ public class ControladorVeiculoApi {
 				.orElse(ResponseEntity.notFound().build());
 	}
 
-	@PostMapping("/criar")
 	/*
 	 * Os anúncios podem ser criados/modificados/excluidos apenas pelo usuário
 	 * proprietário ou administradores. Lembrando que a
 	 * propriedade authentication.name é o cpf do usuário logado
 	 */
+	
+	//Insere um novo anúncio de veiculo
+	@PostMapping("/criar")
 	@PreAuthorize("isAuthenticated()")
 	public VeiculoDTO criar(Authentication authentication, @Valid @RequestBody Veiculo veic) {
 				
@@ -160,6 +142,7 @@ public class ControladorVeiculoApi {
 
 	}
 
+	//Edita o anúncio do veiculo pelo seu ID
 	@PutMapping("/atualizar/{id}")
 	@PreAuthorize("hasAuthority('ADMIN') or this.verificaSeVeiculoPertenceUsuario(#id, authentication.name)")
 	public ResponseEntity<VeiculoDTO> atualizar(@PathVariable long id, @Valid @RequestBody Veiculo veiculo) {
@@ -179,6 +162,7 @@ public class ControladorVeiculoApi {
 
 	}
 
+	//Exclui o anúncio do veiculo pelo seu ID
 	@DeleteMapping(path = { "/excluir/{id}" })
 	@PreAuthorize("hasAuthority('ADMIN') or this.verificaSeVeiculoPertenceUsuario(#id, authentication.name)")
 	public ResponseEntity<?> excluir(@PathVariable long id) {

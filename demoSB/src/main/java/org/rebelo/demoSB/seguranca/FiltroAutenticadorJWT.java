@@ -78,7 +78,7 @@ public class FiltroAutenticadorJWT extends UsernamePasswordAuthenticationFilter 
 			// res.getWriter().flush();
 
 		} catch (JWTCreationException exception) {
-		
+		//implementar
 		}
 
 	}
