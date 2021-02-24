@@ -59,7 +59,7 @@ public class Usuario implements Serializable {
 	
 	@JsonIgnore //anuncios de veiculos tem seu próprio repositório
 	@OneToMany(mappedBy = "usuario", orphanRemoval = true, cascade = { CascadeType.ALL })
-	private List<Veiculo> veiculosAnunciados;
+	private List<AnuncioVeiculo> veiculosAnunciados;
 
 	public Usuario() {
 		super();
@@ -143,11 +143,11 @@ public class Usuario implements Serializable {
 		return usuarioDto;
 	}
 
-	public List<Veiculo> getVeiculosAnunciados() {
+	public List<AnuncioVeiculo> getVeiculosAnunciados() {
 		return veiculosAnunciados;
 	}
 
-	public void setVeiculosAnunciados(List<Veiculo> veiculosAnunciados) {
+	public void setVeiculosAnunciados(List<AnuncioVeiculo> veiculosAnunciados) {
 		this.veiculosAnunciados = veiculosAnunciados;
 	}
 

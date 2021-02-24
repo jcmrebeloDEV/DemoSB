@@ -16,12 +16,12 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.rebelo.demoSB.DTO.VeiculoDTO;
+import org.rebelo.demoSB.DTO.AnuncioVeiculoDTO;
 import org.rebelo.demoSB.entidade.Enum.Marca;
 
 
 @Entity
-public class Veiculo  implements Serializable{
+public class AnuncioVeiculo  implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -121,22 +121,22 @@ public class Veiculo  implements Serializable{
 		this.dataDeCadastro = dataDeCadastro;
 	}
 	 
-	public VeiculoDTO toVeiculoDTO() {
+	public AnuncioVeiculoDTO toAnuncioVeiculoDTO() {
 		
-		VeiculoDTO veiculoDTO = new VeiculoDTO();
+		AnuncioVeiculoDTO anuncioVeiculoDTO = new AnuncioVeiculoDTO();
 		
-		veiculoDTO.setId(this.getId());
-		veiculoDTO.setAno(this.getAno());
-		veiculoDTO.setDataDeCadastro(this.getDataDeCadastro());
-		veiculoDTO.setMarca(this.getMarca());
-		veiculoDTO.setPreco(this.getPreco());
-		veiculoDTO.setModelo(this.getModelo());
-		veiculoDTO.setDescricao(this.getDescricao());
-		veiculoDTO.setContatoPrincipal(this.getUsuario().getEmail());
-		veiculoDTO.setContatosAdicionais(this.getUsuario().getContatosAdicionais());
-		veiculoDTO.setNomeDoAnunciante(this.getUsuario().getNome());
+		anuncioVeiculoDTO.setId(this.getId());
+		anuncioVeiculoDTO.setAno(this.getAno());
+		anuncioVeiculoDTO.setDataDeCadastro(this.getDataDeCadastro());
+		anuncioVeiculoDTO.setMarca(this.getMarca());
+		anuncioVeiculoDTO.setPreco(this.getPreco());
+		anuncioVeiculoDTO.setModelo(this.getModelo());
+		anuncioVeiculoDTO.setDescricao(this.getDescricao());
+		anuncioVeiculoDTO.setContatoPrincipal(this.getUsuario().getEmail());
+		anuncioVeiculoDTO.setContatosAdicionais(this.getUsuario().getContatosAdicionais());
+		anuncioVeiculoDTO.setNomeDoAnunciante(this.getUsuario().getNome());
 		
-		return veiculoDTO;
+		return anuncioVeiculoDTO;
 		
 	}
 

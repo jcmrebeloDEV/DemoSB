@@ -7,11 +7,11 @@ import java.util.ArrayList;
 
 import org.rebelo.demoSB.entidade.Contato;
 import org.rebelo.demoSB.entidade.Usuario;
-import org.rebelo.demoSB.entidade.Veiculo;
+import org.rebelo.demoSB.entidade.AnuncioVeiculo;
 import org.rebelo.demoSB.entidade.Enum.Marca;
 import org.rebelo.demoSB.entidade.Enum.TipoDoContato;
 import org.rebelo.demoSB.repositorio.RepositorioUsuario;
-import org.rebelo.demoSB.repositorio.RepositorioVeiculo;
+import org.rebelo.demoSB.repositorio.RepositorioAnuncioVeiculo;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -32,7 +32,7 @@ public class DemoSbApplication {
 	
 	//metodo "ad hoc" para popular o BD H2 com alguns registros iniciais
 	@Bean
-	public ApplicationRunner initializer(RepositorioVeiculo repositorioVeiculo, 
+	public ApplicationRunner initializer(RepositorioAnuncioVeiculo repositorioAnuncioVeiculo, 
 			RepositorioUsuario  repositorioUsuario,
 			BCryptPasswordEncoder bCryptPasswordEncoder){
 		
@@ -68,7 +68,7 @@ public class DemoSbApplication {
 				
 				repositorioUsuario.save(u);
 				
-				Veiculo v1 = new Veiculo();
+				AnuncioVeiculo v1 = new AnuncioVeiculo();
 				v1.setUsuario(repositorioUsuario.findById("74018276036").get());
 				v1.setModelo("SLK Roadster");
 				v1.setMarca(Marca.MERCEDES);
@@ -77,9 +77,9 @@ public class DemoSbApplication {
 				v1.setDataDeCadastro(LocalDateTime.now());
 				v1.setPreco(BigDecimal.valueOf(75000.00));
 
-				repositorioVeiculo.save(v1);
+				repositorioAnuncioVeiculo.save(v1);
 				
-				Veiculo v2 = new Veiculo();
+				AnuncioVeiculo v2 = new AnuncioVeiculo();
 				v2.setUsuario(repositorioUsuario.findById("74018276036").get());
 				v2.setModelo("328i");
 				v2.setMarca(Marca.BMW);
@@ -88,7 +88,7 @@ public class DemoSbApplication {
 				v2.setDataDeCadastro(LocalDateTime.now());
 				v2.setPreco(BigDecimal.valueOf(75000.00));
 
-				repositorioVeiculo.save(v2);
+				repositorioAnuncioVeiculo.save(v2);
 
 			 
 		 };

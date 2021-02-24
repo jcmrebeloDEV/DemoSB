@@ -7,7 +7,7 @@ import java.util.List;
 import org.rebelo.demoSB.entidade.Contato;
 import org.rebelo.demoSB.entidade.Enum.Marca;
 
-public class VeiculoDTO {
+public class AnuncioVeiculoDTO {
 	
 	private long id;
 	

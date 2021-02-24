@@ -1,7 +1,7 @@
 package org.rebelo.demoSB;
 
 import org.junit.jupiter.api.Test;
-import org.rebelo.demoSB.controladores.ControladorVeiculoApi;
+import org.rebelo.demoSB.controladores.ControladorAnuncioVeiculoApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DemoSbApplicationTests {
 
 	@Autowired
-	private ControladorVeiculoApi controller;
+	private ControladorAnuncioVeiculoApi controller;
 
 	@Test
 	public void contextLoads() {
