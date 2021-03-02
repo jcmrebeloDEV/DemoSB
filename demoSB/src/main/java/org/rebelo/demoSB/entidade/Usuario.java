@@ -18,6 +18,8 @@ import org.rebelo.demoSB.DTO.UsuarioDTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.annotations.ApiModelProperty;
+
 @Entity
 public class Usuario implements Serializable {
 
@@ -27,10 +29,12 @@ public class Usuario implements Serializable {
 	@NotNull(message = "campo cpf deve ser informado")
 	@NotBlank(message = "campo cpf não pode ser vazio")
 	@CPF(message = "Cpf deve ser válido formato xxx.xxx.xxx-xx")
+	@ApiModelProperty(position = 1, required = true, notes = "Cpf do usuário")
 	private String cpf;
 
 	@NotNull
 	@Size(min = 2, max = 30)
+	@ApiModelProperty(position = 2, required = true, notes = "Nome do usuário")
 	private String nome;
 
 	/*
@@ -42,19 +46,23 @@ public class Usuario implements Serializable {
 	 * 
 	 */
 	@Email
+	@ApiModelProperty(position = 3, required = true, notes = "Email do usuário")
 	private String email;
 
 	@Past
+	@ApiModelProperty(position = 4, required = true, notes = "Data de nascimento do usuário")
 	private LocalDate nascimento;
 
 	@NotNull
 	@Size(min = 8)
+	@ApiModelProperty(position = 5, required = true, notes = "Senha do usuário (mínimo 8 caracteres)")
 	private String senha;
 
 	@JsonIgnore
 	private boolean admin; // flag para identificar se o usuario é administrador
 
 	@OneToMany(mappedBy = "usuario", orphanRemoval = true, cascade = { CascadeType.ALL })
+	@ApiModelProperty(position = 6, required = false, notes = "Contatos adicionais do usuário")
 	private List<Contato> contatosAdicionais;
 	
 	@JsonIgnore //anuncios de veiculos tem seu próprio repositório

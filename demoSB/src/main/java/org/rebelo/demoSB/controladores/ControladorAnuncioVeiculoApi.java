@@ -16,16 +16,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import org.rebelo.demoSB.repositorio.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
-
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.rebelo.demoSB.DTO.AnuncioVeiculoDTO;
 import org.rebelo.demoSB.entidade.*;
 
+@Api(value = "Endpoints para Gerenciar Anúncios de Veículos", 
+tags = "Endpoints para Gerenciar Anúncios de Veículos")
 @RestController
 @RequestMapping("/anuncios/veiculos")
 public class ControladorAnuncioVeiculoApi {
@@ -61,16 +68,18 @@ public class ControladorAnuncioVeiculoApi {
 	 * }
 	 */
 
+	@ApiOperation(value = "Lista os anúncios de veículos") 
 	@GetMapping("/listar")
 	@ResponseBody
-	public ResponseEntity<Page<AnuncioVeiculoDTO>> listar(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "1") int size) {
+	public ResponseEntity<Page<AnuncioVeiculoDTO>> listar(
+			@RequestParam(defaultValue = "0") int p,
+			@RequestParam(defaultValue = "10") int n) {
 
-		if (page < 0 || size < 1)
+		if (p < 0 || n < 1)
 			return ResponseEntity.badRequest().build();
 		
 		Page<AnuncioVeiculoDTO> pagina = this.repositorioAnuncioVeiculo
-				.findAll(PageRequest.of(page, size, Sort.by("modelo")))
+				.findAll(PageRequest.of(p, n, Sort.by("modelo")))
 				.map(v->v.toAnuncioVeiculoDTO());
 
 
@@ -78,17 +87,19 @@ public class ControladorAnuncioVeiculoApi {
 
 	}
 
-	
-	@GetMapping("/listarporusuario/{cpf}")
+	@ApiOperation(value = "Lista os anúncios de veículos por usuário") 
+	@GetMapping("/listar/por/usuario/{cpf}")
 	@ResponseBody
-	public ResponseEntity<Page<AnuncioVeiculoDTO>>  listarPorUsuario(@PathVariable String cpf, @RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "1") int size) {
+	public ResponseEntity<Page<AnuncioVeiculoDTO>>  listarPorUsuario(
+			@PathVariable String cpf,
+			@RequestParam(defaultValue = "0") int p,
+			@RequestParam(defaultValue = "10") int n) {
 
-		if (page < 0 || size < 1)
+		if (p < 0 || n < 1)
 			return ResponseEntity.badRequest().build();
 		
 		Page<AnuncioVeiculoDTO> pagina = this.repositorioAnuncioVeiculo
-				.listarPorUsuario(cpf,PageRequest.of(page, size, Sort.by("modelo")))
+				.listarPorUsuario(cpf,PageRequest.of(p, n, Sort.by("modelo")))
 				.map(v->v.toAnuncioVeiculoDTO());
 
 
@@ -96,23 +107,31 @@ public class ControladorAnuncioVeiculoApi {
 
 	}
 
-	
-	@GetMapping("/pesquisarpormodelo/{query}")
+	//pesquisa usando o Hibernate Search
+	@ApiOperation(value = "Pesquisa os anúncios de veículos pelos campos descrição e modelo") 
+	@GetMapping("/pesquisar")
 	@ResponseBody
-	public ResponseEntity<Page<AnuncioVeiculoDTO>> pesquisarPorModelo(@PathVariable String query,  @RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "1") int size) {
+	public ResponseEntity<List<AnuncioVeiculoDTO>> pesquisar(
+			@RequestParam(defaultValue ="") String q,
+			@RequestParam(defaultValue = "0") int p,
+			@RequestParam(defaultValue = "10") int n) {
 		
-		if (page < 0 || size < 1)
-			return ResponseEntity.badRequest().build();
+		List<AnuncioVeiculoDTO> searchResults = null;
 		
-		Page<AnuncioVeiculoDTO> pagina = this.repositorioAnuncioVeiculo
-				.findByModeloContainingIgnoreCase(query,PageRequest.of(page, size, Sort.by("modelo")))
-				.map(v->v.toAnuncioVeiculoDTO());
+		try {
+			searchResults = this.repositorioAnuncioVeiculo.pesquisar(q, n, p)
+					.stream().map(a-> a.toAnuncioVeiculoDTO())
+					.collect(Collectors.toList());;
+
+		} catch (Exception ex) {
+			// Nothing
+		}
 
 
-		return ResponseEntity.ok().body(pagina);
+		return ResponseEntity.ok().body(searchResults);
 	}
-
+	
+	
 	@GetMapping("/buscar/{id}")
 	public ResponseEntity<AnuncioVeiculoDTO> buscar(@PathVariable long id) {
 
@@ -127,6 +146,7 @@ public class ControladorAnuncioVeiculoApi {
 	 */
 	
 	//Insere um novo anúncio de veiculo
+	@ApiOperation(value = "Cria um novo anúncio de veículo") 
 	@PostMapping("/criar")
 	@PreAuthorize("isAuthenticated()")
 	public AnuncioVeiculoDTO criar(Authentication authentication, @Valid @RequestBody AnuncioVeiculo anuncioVeiculo) {
@@ -143,6 +163,7 @@ public class ControladorAnuncioVeiculoApi {
 	}
 
 	//Edita o anúncio do veiculo pelo seu ID
+	@ApiOperation(value = "Edita o anúncio do veiculo pelo seu ID") 
 	@PutMapping("/atualizar/{id}")
 	@PreAuthorize("hasAuthority('ADMIN') or this.verificaSeAnuncioPertenceUsuario(#id, authentication.name)")
 	public ResponseEntity<AnuncioVeiculoDTO> atualizar(@PathVariable long id, @Valid @RequestBody AnuncioVeiculo anuncioVeiculo) {
@@ -163,6 +184,7 @@ public class ControladorAnuncioVeiculoApi {
 	}
 
 	//Exclui o anúncio do veiculo pelo seu ID
+	@ApiOperation(value = "Exclui o anúncio do veiculo pelo seu ID") 
 	@DeleteMapping(path = { "/excluir/{id}" })
 	@PreAuthorize("hasAuthority('ADMIN') or this.verificaSeAnuncioPertenceUsuario(#id, authentication.name)")
 	public ResponseEntity<?> excluir(@PathVariable long id) {

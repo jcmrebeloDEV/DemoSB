@@ -106,7 +106,7 @@ public class TestesIntegracaoAnuncioVeiculo {
 
 		int numeroRegistros =(int) repositorioAnuncioVeiculo.count();
 		
-		mockMvc.perform(get("/anuncios/veiculos/listar/?page=0&size={size}",numeroRegistros))//uma pagina com todos os registros
+		mockMvc.perform(get("/anuncios/veiculos/listar/?p=0&n={numeroRegistros}",numeroRegistros))//uma pagina com todos os registros
 		.andExpect(status().isOk())
 		.andExpect(content().contentType("application/json"))
 		.andExpect(jsonPath("$.content", hasSize(numeroRegistros)))
@@ -116,13 +116,13 @@ public class TestesIntegracaoAnuncioVeiculo {
 	}
 
 	@Test
-	public void testeControladorAnuncioVeiculo_PesquisarPorModelo() throws Exception {
+	public void testeControladorAnuncioVeiculo_Pesquisar() throws Exception {
 		
-		mockMvc.perform(get("/anuncios/veiculos/pesquisarpormodelo/{query}/?page=0&size=1", "28i" /*328i*/))
+		mockMvc.perform(get("/anuncios/veiculos/pesquisar/?q={query}&p={pagina}&n={numeroRegistros}", "Roadster turbo", "0","10"))
 		.andExpect(status().isOk())
 		.andExpect(content().contentType("application/json"))
-		.andExpect(jsonPath("$.content", hasSize(1)))
-		.andExpect(jsonPath("$.content[0].marca", is(Marca.BMW.toString())))
+		.andExpect(jsonPath("$", hasSize(2)))
+		.andExpect(jsonPath("$[0].marca", is(Marca.MERCEDES.toString())))
 		.andReturn();
 
 	}

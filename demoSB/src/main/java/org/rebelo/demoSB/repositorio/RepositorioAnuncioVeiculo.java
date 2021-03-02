@@ -10,7 +10,8 @@ import org.rebelo.demoSB.entidade.*;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RepositorioAnuncioVeiculo extends JpaRepository<AnuncioVeiculo, Long> {
+public interface RepositorioAnuncioVeiculo extends JpaRepository<AnuncioVeiculo, Long>
+, AnuncioVeiculoMecanismoDeBusca{
 
 	@Query(value = "select v from AnuncioVeiculo v where v.usuario.cpf = ?1", nativeQuery = false)
 	Page<AnuncioVeiculo>  listarPorUsuario(String cpf, Pageable pageable);

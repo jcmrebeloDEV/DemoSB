@@ -36,10 +36,14 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, Constantes.CADASTRO_API).permitAll()
                 .antMatchers("/").permitAll()
                 .antMatchers("/anuncios/veiculos/listar/").permitAll()
-                .antMatchers("/anuncios/veiculos/listarporusuario/**").permitAll()
+                .antMatchers("/anuncios/veiculos/listar/por/usuario/**").permitAll()
                 .antMatchers("/anuncios/veiculos/buscar/**").permitAll()
-                .antMatchers("/anuncios/veiculos/pesquisarpormodelo/**").permitAll()
+                .antMatchers("/anuncios/veiculos/pesquisar/**").permitAll()
+                .antMatchers("/anuncios/veiculos/pesquisar/por/modelo/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll() //para usar o console do DB H2
+                .antMatchers("/v2/api-docs").permitAll()//para acessar a lista de API's 
+                .antMatchers("/swagger-ui/**").permitAll() //para acessar o SpringFox Swagger UI
+                .antMatchers("/swagger-resources/**").permitAll() //para acessar o SpringFox Swagger UI
                 .anyRequest().authenticated().and()
                 .addFilter(new FiltroAutenticadorJWT(authenticationManager()))
                 .exceptionHandling().authenticationEntryPoint(new AuthenticationEntryPointJWT()).and()

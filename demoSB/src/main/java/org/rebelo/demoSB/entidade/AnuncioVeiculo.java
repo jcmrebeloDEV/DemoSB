@@ -16,20 +16,27 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+
 import org.rebelo.demoSB.DTO.AnuncioVeiculoDTO;
 import org.rebelo.demoSB.entidade.Enum.Marca;
 
+import io.swagger.annotations.ApiModelProperty;
+
 
 @Entity
+@Indexed
 public class AnuncioVeiculo  implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 	
-	
+	@ApiModelProperty(hidden=true)
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 	
+	 @ApiModelProperty(hidden=true)
 	 @ManyToOne
 	 @JoinColumn(name="cpf_fk")
 	 //@NotNull
@@ -38,6 +45,7 @@ public class AnuncioVeiculo  implements Serializable{
 	 @NotNull
 	 Marca marca;
 	 
+	 @Field
 	 @NotNull
 	 @Size(min=2, max=50)
 	 String modelo;
@@ -51,6 +59,7 @@ public class AnuncioVeiculo  implements Serializable{
 	 @DecimalMin(value = "0.0", inclusive = false)
 	 BigDecimal preco;
 	 
+	 @Field
 	 @NotNull
 	 @Size(min=2, max=500)
 	 String descricao;
