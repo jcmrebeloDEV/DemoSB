@@ -59,7 +59,7 @@ public class TestesIntegracaoUsuario {
 		
 		String token_com_privilegio_Administrador = obterTokenJWT(cpf, senha);
 									
-			mockMvc.perform(get("/usuarios/listar/?page=0&size={size}",numeroRegistros)//uma pagina com todos os registros
+			mockMvc.perform(get("/usuarios/listar/?p=0&n={numeroRegistros}",numeroRegistros)//uma pagina com todos os registros
 		   .header("Authorization", token_com_privilegio_Administrador)			
 		   .contentType("application/json"))
 			.andExpect(status().isOk())
@@ -81,7 +81,7 @@ public class TestesIntegracaoUsuario {
 		
 		String token_com_privilegio_Administrador = obterTokenJWT(cpf, senha);
 									
-			mockMvc.perform(get("/usuarios/pesquisarpornome/{nome}/?page=0&size=1","ste")//pagina com todos os registros
+			mockMvc.perform(get("/usuarios/pesquisar/por/nome/{query}/?p=0&n=1","ste")//pagina com todos os registros
 		   .header("Authorization", token_com_privilegio_Administrador)			
 		   .contentType("application/json"))
 			.andExpect(status().isOk())

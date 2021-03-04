@@ -22,6 +22,8 @@ import org.hibernate.search.annotations.Indexed;
 import org.rebelo.demoSB.DTO.AnuncioVeiculoDTO;
 import org.rebelo.demoSB.entidade.Enum.Marca;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.swagger.annotations.ApiModelProperty;
 
 
@@ -42,28 +44,35 @@ public class AnuncioVeiculo  implements Serializable{
 	 //@NotNull
 	 private Usuario usuario;
 	
+	 @ApiModelProperty(position = 1, required = true, notes = "Marca do veículo")
 	 @NotNull
 	 Marca marca;
 	 
+	 @ApiModelProperty(position = 2, required = true, notes = "Modelo do veículo")
 	 @Field
 	 @NotNull
 	 @Size(min=2, max=50)
 	 String modelo;
 	 
+	 @ApiModelProperty(position = 3, required = true, notes = "Ano do veículo")
 	 @NotNull
 	 @Max(2021)
 	 @Min(1910)
 	 int ano;
 	 
+	 @ApiModelProperty(position = 4, required = true, notes = "Preço do veículo")
 	 @NotNull
 	 @DecimalMin(value = "0.0", inclusive = false)
 	 BigDecimal preco;
 	 
+	 @ApiModelProperty(position = 5, required = true, notes = "Texto para descrção do veículo")
 	 @Field
 	 @NotNull
 	 @Size(min=2, max=500)
 	 String descricao;
 	 
+	 //@ApiModelProperty(position = 6, required = true, notes = "Data de cadastro do anúncio do veículo")
+	 @JsonIgnore
 	 LocalDateTime dataDeCadastro;
 
 	public long getId() {

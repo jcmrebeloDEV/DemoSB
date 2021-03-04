@@ -39,7 +39,6 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers("/anuncios/veiculos/listar/por/usuario/**").permitAll()
                 .antMatchers("/anuncios/veiculos/buscar/**").permitAll()
                 .antMatchers("/anuncios/veiculos/pesquisar/**").permitAll()
-                .antMatchers("/anuncios/veiculos/pesquisar/por/modelo/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll() //para usar o console do DB H2
                 .antMatchers("/v2/api-docs").permitAll()//para acessar a lista de API's 
                 .antMatchers("/swagger-ui/**").permitAll() //para acessar o SpringFox Swagger UI

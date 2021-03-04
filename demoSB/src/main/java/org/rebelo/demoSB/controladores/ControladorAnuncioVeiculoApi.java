@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import springfox.documentation.annotations.ApiIgnore;
 
 import org.rebelo.demoSB.repositorio.*;
 import java.time.LocalDateTime;
@@ -68,12 +72,15 @@ public class ControladorAnuncioVeiculoApi {
 	 * }
 	 */
 
-	@ApiOperation(value = "Lista os anúncios de veículos") 
+	@ApiOperation(value = "Lista os anúncios de veículos")
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Sucesso")
+	})
 	@GetMapping("/listar")
 	@ResponseBody
 	public ResponseEntity<Page<AnuncioVeiculoDTO>> listar(
-			@RequestParam(defaultValue = "0") int p,
-			@RequestParam(defaultValue = "10") int n) {
+			@ApiParam("Número da página (padrão é 0)") @RequestParam(defaultValue = "0") int p,
+			@ApiParam("Número de registros por página (padrão é 10)") @RequestParam(defaultValue = "10") int n) {
 
 		if (p < 0 || n < 1)
 			return ResponseEntity.badRequest().build();
@@ -88,12 +95,15 @@ public class ControladorAnuncioVeiculoApi {
 	}
 
 	@ApiOperation(value = "Lista os anúncios de veículos por usuário") 
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Sucesso")
+	})
 	@GetMapping("/listar/por/usuario/{cpf}")
 	@ResponseBody
 	public ResponseEntity<Page<AnuncioVeiculoDTO>>  listarPorUsuario(
-			@PathVariable String cpf,
-			@RequestParam(defaultValue = "0") int p,
-			@RequestParam(defaultValue = "10") int n) {
+			@ApiParam("Cpf do usuário. ")@PathVariable String cpf,
+			@ApiParam("Número da página (padrão é 0)") @RequestParam(defaultValue = "0") int p,
+			@ApiParam("Número de registros por página (padrão é 10)") @RequestParam(defaultValue = "10") int n) {
 
 		if (p < 0 || n < 1)
 			return ResponseEntity.badRequest().build();
@@ -109,12 +119,15 @@ public class ControladorAnuncioVeiculoApi {
 
 	//pesquisa usando o Hibernate Search
 	@ApiOperation(value = "Pesquisa os anúncios de veículos pelos campos descrição e modelo") 
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Sucesso")
+	})
 	@GetMapping("/pesquisar")
 	@ResponseBody
 	public ResponseEntity<List<AnuncioVeiculoDTO>> pesquisar(
-			@RequestParam(defaultValue ="") String q,
-			@RequestParam(defaultValue = "0") int p,
-			@RequestParam(defaultValue = "10") int n) {
+			@ApiParam("Palavras-chave a serem pesquisadas. ") @RequestParam(defaultValue ="") String q,
+			@ApiParam("Número da página (padrão é 0)") @RequestParam(defaultValue = "0") int p,
+			@ApiParam("Número de registros por página (padrão é 10)") @RequestParam(defaultValue = "10") int n) {
 		
 		List<AnuncioVeiculoDTO> searchResults = null;
 		
@@ -131,9 +144,13 @@ public class ControladorAnuncioVeiculoApi {
 		return ResponseEntity.ok().body(searchResults);
 	}
 	
-	
+	@ApiOperation(value = "Retorna o anúncio de veículos pelo identificador") 
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Sucesso")
+	})
 	@GetMapping("/buscar/{id}")
-	public ResponseEntity<AnuncioVeiculoDTO> buscar(@PathVariable long id) {
+	public ResponseEntity<AnuncioVeiculoDTO> buscar(@ApiParam("identificador do anúncio. ") 
+	@PathVariable long id) {
 
 		return this.repositorioAnuncioVeiculo.findById(id).map(anunVeiculo -> ResponseEntity.ok().body(anunVeiculo.toAnuncioVeiculoDTO()))
 				.orElse(ResponseEntity.notFound().build());
@@ -147,9 +164,15 @@ public class ControladorAnuncioVeiculoApi {
 	
 	//Insere um novo anúncio de veiculo
 	@ApiOperation(value = "Cria um novo anúncio de veículo") 
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Sucesso")
+	})
 	@PostMapping("/criar")
 	@PreAuthorize("isAuthenticated()")
-	public AnuncioVeiculoDTO criar(Authentication authentication, @Valid @RequestBody AnuncioVeiculo anuncioVeiculo) {
+	public AnuncioVeiculoDTO criar(
+			@ApiIgnore Authentication authentication, 
+			@ApiParam("informações a serem inseridas do novo anúncio. ") 
+	@Valid @RequestBody AnuncioVeiculo anuncioVeiculo) {
 				
 		String cpfDoUsuario = authentication.getName();
 
@@ -164,9 +187,15 @@ public class ControladorAnuncioVeiculoApi {
 
 	//Edita o anúncio do veiculo pelo seu ID
 	@ApiOperation(value = "Edita o anúncio do veiculo pelo seu ID") 
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Sucesso")
+	})
 	@PutMapping("/atualizar/{id}")
 	@PreAuthorize("hasAuthority('ADMIN') or this.verificaSeAnuncioPertenceUsuario(#id, authentication.name)")
-	public ResponseEntity<AnuncioVeiculoDTO> atualizar(@PathVariable long id, @Valid @RequestBody AnuncioVeiculo anuncioVeiculo) {
+	public ResponseEntity<AnuncioVeiculoDTO> atualizar(@ApiParam("identificador do anúncio. ") 
+	@PathVariable long id, 
+	@ApiParam("informações a serem atualizadas do anúncio. ") 
+	@Valid @RequestBody AnuncioVeiculo anuncioVeiculo) {
 
 		return this.repositorioAnuncioVeiculo.findById(id).map(registrOriginal -> {
 
@@ -185,9 +214,13 @@ public class ControladorAnuncioVeiculoApi {
 
 	//Exclui o anúncio do veiculo pelo seu ID
 	@ApiOperation(value = "Exclui o anúncio do veiculo pelo seu ID") 
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Sucesso")
+	})
 	@DeleteMapping(path = { "/excluir/{id}" })
 	@PreAuthorize("hasAuthority('ADMIN') or this.verificaSeAnuncioPertenceUsuario(#id, authentication.name)")
-	public ResponseEntity<?> excluir(@PathVariable long id) {
+	public ResponseEntity<?> excluir(@ApiParam("identificador do anúncio. ") 
+	@PathVariable long id) {
 		return this.repositorioAnuncioVeiculo.findById(id).map(record -> {
 			this.repositorioAnuncioVeiculo.deleteById(id);
 			return ResponseEntity.ok().build();

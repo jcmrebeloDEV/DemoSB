@@ -16,11 +16,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 import org.rebelo.demoSB.repositorio.RepositorioUsuario;
 import javax.validation.Valid;
 import org.rebelo.demoSB.DTO.UsuarioDTO;
 import org.rebelo.demoSB.entidade.*;
 
+@Api(value = "Endpoints para Gerenciar Usuários", 
+tags = "Endpoints para Gerenciar Usuários")
 @RestController
 @RequestMapping("/usuarios")
 public class ControladorUsuarioApi {
@@ -33,18 +42,41 @@ public class ControladorUsuarioApi {
 		this.codificadorDeSenha = codificadorDeSenha;
 	}
 	
+	/*
+	//fake api para gerar documentação do swagger relativa a api de login implementada pelo Spring Security
+	@ApiOperation("Api para o login de usuários. Entrada no formato {\n" + 
+			"    \"cpf\": \"67681905049\",\n" + 
+			"    \"senha\": \"12345678\"\n" + 
+			"    \n" + 
+			"} e como resposta um token JWT caso autenticado com sucesso")
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Usuário autenticado com sucesso; Retorna um token JWT no Header")
+	})
+	@PostMapping("/login")
+	public void fakeLogin(@ApiParam("cpf do usuário") @RequestParam String cpf, 
+			@ApiParam("senha do usuário") @RequestParam String senha) {
+	    throw new IllegalStateException("Este método é implementado pelo Spring Security.");
+	}
+	
+	*/
+	
+	@ApiOperation(value = "Lista os usuários")
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Sucesso")
+	})
 	@GetMapping("/listar")
 	// somente Administradores podem listar os usuarios
 	@PreAuthorize("hasAuthority('ADMIN')") 
 	@ResponseBody
-	public ResponseEntity<Page<UsuarioDTO>> listar(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "1") int size) {
+	public ResponseEntity<Page<UsuarioDTO>> listar(
+			@ApiParam("Número da página (padrão é 0)") @RequestParam(defaultValue = "0") int p,
+			@ApiParam("Número de registros por página (padrão é 10)") @RequestParam(defaultValue = "10") int n) {
 
-		if (page < 0 || size < 1)
+		if (p < 0 || n < 1)
 			return ResponseEntity.badRequest().build();
 		
 		Page<UsuarioDTO> pagina = this.repositorioUsuario
-				.findAll(PageRequest.of(page, size, Sort.by("nome").descending()))
+				.findAll(PageRequest.of(p, n, Sort.by("nome").descending()))
 				.map(u->u.toUsuarioDTO());
 
 
@@ -52,16 +84,24 @@ public class ControladorUsuarioApi {
 
 	}
 	
-	@GetMapping("/pesquisarpornome/{query}")
+	@ApiOperation(value = "Pesquisa os usuários por nome")
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Sucesso")
+	})
+	// somente Administradores podem pesquisar os usuarios
+	@GetMapping("/pesquisar/por/nome/{query}")
+	@PreAuthorize("hasAuthority('ADMIN')") 
 	@ResponseBody
-	public ResponseEntity<Page<UsuarioDTO>> pesquisarPorNome(@PathVariable String query,  @RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "1") int size) {
+	public ResponseEntity<Page<UsuarioDTO>> pesquisarPorNome(
+			@ApiParam("Nome completo ou parte do nome do usuário") @PathVariable String query, 
+			@ApiParam("Número da página (padrão é 0)") @RequestParam(defaultValue = "0") int p,
+			@ApiParam("Número de registros por página (padrão é 10)") @RequestParam(defaultValue = "10") int n) {
 		
-		if (page < 0 || size < 1)
+		if (p < 0 || n < 1)
 			return ResponseEntity.badRequest().build();
 		
 		Page<UsuarioDTO> pagina = this.repositorioUsuario
-				.findByNomeContainingIgnoreCase(query,PageRequest.of(page, size, Sort.by("nome").descending()))
+				.findByNomeContainingIgnoreCase(query,PageRequest.of(p, n, Sort.by("nome").descending()))
 				.map(u->u.toUsuarioDTO());
 
 
@@ -72,10 +112,14 @@ public class ControladorUsuarioApi {
 	 Os dados de um usuário podem ser acessados apenas por ele mesmo ou por
 	 administradores. Lembrando que a propriedade authentication.name é o cpf do usuário logado 
 	 */
+	@ApiOperation(value = "Retorna um usuário pelo seu Cpf")
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Sucesso")
+	})
 	@GetMapping("/buscar/{cpf}")
 	@PreAuthorize("hasAuthority('ADMIN')  or #cpf == authentication.name")
 	@ResponseBody
-	public ResponseEntity<UsuarioDTO> buscar(@PathVariable String cpf) {
+	public ResponseEntity<UsuarioDTO> buscar(@ApiParam("Cpf do usuário") @PathVariable String cpf) {
 
 		return this.repositorioUsuario.findById(cpf).map(usuario -> ResponseEntity.ok().body(usuario.toUsuarioDTO()))
 				.orElse(ResponseEntity.notFound().build());
@@ -83,8 +127,12 @@ public class ControladorUsuarioApi {
 	}
 
 	//Qualquer pessoa pode se cadastrar no sistema
+	@ApiOperation(value = "Cria um novo usuário")
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Sucesso")
+	})
 	@PostMapping("/criar/")
-	public UsuarioDTO criar(@Valid @RequestBody Usuario usr) {
+	public UsuarioDTO criar(@ApiParam("Dados do novo usuário") @Valid @RequestBody Usuario usr) {
 
 		usr.getContatosAdicionais().forEach((c) -> c.setUsuario(usr));
 
@@ -98,9 +146,15 @@ public class ControladorUsuarioApi {
 	 Os dados de um usuário podem ser atualizados apenas por ele mesmo ou por
 	 administradores. Lembrando que a propriedade authentication.name é o cpf do usuário logado 
 	 */
+	@ApiOperation(value = "Atualiza os dados de um usuário")
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Sucesso")
+	})
 	@PutMapping("/atualizar/{cpf}")
 	@PreAuthorize("hasAuthority('ADMIN')  or #cpf == authentication.name")
-	public ResponseEntity<UsuarioDTO> atualizar(@PathVariable String cpf, @Valid @RequestBody Usuario usr) {
+	public ResponseEntity<UsuarioDTO> atualizar(
+			@ApiParam("Cpf do usuário") @PathVariable String cpf, 
+			@ApiParam("Dados a serem atualizados do usuário") @Valid @RequestBody Usuario usr) {
 
 		usr.getContatosAdicionais().forEach((c) -> c.setUsuario(usr));
 
@@ -126,13 +180,20 @@ public class ControladorUsuarioApi {
 	 Um usuário pode ser excluido apenas por ele mesmo ou por
 	 administradores. Lembrando que a propriedade authentication.name é o cpf do usuário logado 
 	 */
+	@ApiOperation(value = "Exclui um usuário")
+	@ApiResponses({
+	    @ApiResponse(code = 200, message = "Sucesso")
+	})
 	@DeleteMapping(path = { "/excluir/{cpf}" })
 	@PreAuthorize("hasAuthority('ADMIN')  or #cpf == authentication.name")
-	public ResponseEntity<?> excluir(@PathVariable String cpf) {
+	public ResponseEntity<?> excluir(@ApiParam("Cpf do usuário") @PathVariable String cpf) {
 		return this.repositorioUsuario.findById(cpf).map(record -> {
 			this.repositorioUsuario.deleteById(cpf);
 			return ResponseEntity.ok().build();
 		}).orElse(ResponseEntity.notFound().build());
 	}
 
+	/* outros testes omitidos */
+	
 }
+
