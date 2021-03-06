@@ -1,7 +1,7 @@
 package org.rebelo.demoSB.seguranca;
 
 import org.rebelo.demoSB.seguranca.Constantes;
-import org.rebelo.demoSB.entidade.Usuario;
+import org.rebelo.demoSB.DTO.LoginDTO;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
@@ -40,11 +40,11 @@ public class FiltroAutenticadorJWT extends UsernamePasswordAuthenticationFilter 
 			throws AuthenticationException {
 		
 			try {
-				Usuario credenciais = new ObjectMapper().readValue(req.getInputStream(), Usuario.class);
+				LoginDTO dadosDeLogin = new ObjectMapper().readValue(req.getInputStream(), LoginDTO.class);
 				
 				return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-						credenciais.getCpf(),  /* username (no caso o cpf) */
-						credenciais.getSenha(), /* senha  */
+						dadosDeLogin.getCpf(),  /* username (no caso o cpf) */
+						dadosDeLogin.getSenha(), /* senha  */
 						new ArrayList<>()) /*lista vazia (apenas username e senha sao fornecidas no login)*/
 				       );
 				

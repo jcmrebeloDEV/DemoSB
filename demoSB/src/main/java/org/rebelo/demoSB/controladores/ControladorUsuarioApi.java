@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -64,6 +65,9 @@ public class ControladorUsuarioApi {
 	@ApiResponses({
 	    @ApiResponse(code = 200, message = "Sucesso")
 	})
+	@ApiImplicitParam(name = "Authorization", value = "Bearer Token JWT para autenticação", required = true, 
+	allowEmptyValue = false, paramType = "header", 
+	example = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9...")
 	@GetMapping("/listar")
 	// somente Administradores podem listar os usuarios
 	@PreAuthorize("hasAuthority('ADMIN')") 
@@ -88,6 +92,9 @@ public class ControladorUsuarioApi {
 	@ApiResponses({
 	    @ApiResponse(code = 200, message = "Sucesso")
 	})
+	@ApiImplicitParam(name = "Authorization", value = "Bearer Token JWT para autenticação", required = true, 
+	allowEmptyValue = false, paramType = "header", 
+	example = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9...")
 	// somente Administradores podem pesquisar os usuarios
 	@GetMapping("/pesquisar/por/nome/{query}")
 	@PreAuthorize("hasAuthority('ADMIN')") 
@@ -116,6 +123,9 @@ public class ControladorUsuarioApi {
 	@ApiResponses({
 	    @ApiResponse(code = 200, message = "Sucesso")
 	})
+	@ApiImplicitParam(name = "Authorization", value = "Bearer Token JWT para autenticação", required = true, 
+	allowEmptyValue = false, paramType = "header", 
+	example = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9...")
 	@GetMapping("/buscar/{cpf}")
 	@PreAuthorize("hasAuthority('ADMIN')  or #cpf == authentication.name")
 	@ResponseBody
@@ -150,6 +160,9 @@ public class ControladorUsuarioApi {
 	@ApiResponses({
 	    @ApiResponse(code = 200, message = "Sucesso")
 	})
+	@ApiImplicitParam(name = "Authorization", value = "Bearer Token JWT para autenticação", required = true, 
+	allowEmptyValue = false, paramType = "header", 
+	example = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9...")
 	@PutMapping("/atualizar/{cpf}")
 	@PreAuthorize("hasAuthority('ADMIN')  or #cpf == authentication.name")
 	public ResponseEntity<UsuarioDTO> atualizar(
@@ -184,6 +197,9 @@ public class ControladorUsuarioApi {
 	@ApiResponses({
 	    @ApiResponse(code = 200, message = "Sucesso")
 	})
+	@ApiImplicitParam(name = "Authorization", value = "Bearer Token JWT para autenticação", required = true, 
+	allowEmptyValue = false, paramType = "header", 
+	example = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9...")
 	@DeleteMapping(path = { "/excluir/{cpf}" })
 	@PreAuthorize("hasAuthority('ADMIN')  or #cpf == authentication.name")
 	public ResponseEntity<?> excluir(@ApiParam("Cpf do usuário") @PathVariable String cpf) {

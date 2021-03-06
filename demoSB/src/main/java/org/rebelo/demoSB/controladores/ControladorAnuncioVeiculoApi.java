@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -167,6 +168,9 @@ public class ControladorAnuncioVeiculoApi {
 	@ApiResponses({
 	    @ApiResponse(code = 200, message = "Sucesso")
 	})
+	@ApiImplicitParam(name = "Authorization", value = "Bearer Token JWT para autenticação", required = true, 
+	allowEmptyValue = false, paramType = "header", 
+	example = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9...")
 	@PostMapping("/criar")
 	@PreAuthorize("isAuthenticated()")
 	public AnuncioVeiculoDTO criar(
@@ -190,6 +194,9 @@ public class ControladorAnuncioVeiculoApi {
 	@ApiResponses({
 	    @ApiResponse(code = 200, message = "Sucesso")
 	})
+	@ApiImplicitParam(name = "Authorization", value = "Bearer Token JWT para autenticação", required = true, 
+	allowEmptyValue = false, paramType = "header", 
+	example = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9...")
 	@PutMapping("/atualizar/{id}")
 	@PreAuthorize("hasAuthority('ADMIN') or this.verificaSeAnuncioPertenceUsuario(#id, authentication.name)")
 	public ResponseEntity<AnuncioVeiculoDTO> atualizar(@ApiParam("identificador do anúncio. ") 
@@ -217,6 +224,9 @@ public class ControladorAnuncioVeiculoApi {
 	@ApiResponses({
 	    @ApiResponse(code = 200, message = "Sucesso")
 	})
+	@ApiImplicitParam(name = "Authorization", value = "Bearer Token JWT para autenticação", required = true, 
+	allowEmptyValue = false, paramType = "header", 
+	example = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9...")
 	@DeleteMapping(path = { "/excluir/{id}" })
 	@PreAuthorize("hasAuthority('ADMIN') or this.verificaSeAnuncioPertenceUsuario(#id, authentication.name)")
 	public ResponseEntity<?> excluir(@ApiParam("identificador do anúncio. ") 
