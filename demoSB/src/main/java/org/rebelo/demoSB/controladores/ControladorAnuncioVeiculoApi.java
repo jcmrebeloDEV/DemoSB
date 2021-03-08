@@ -125,25 +125,18 @@ public class ControladorAnuncioVeiculoApi {
 	})
 	@GetMapping("/pesquisar")
 	@ResponseBody
-	public ResponseEntity<List<AnuncioVeiculoDTO>> pesquisar(
+	public ResponseEntity<Page<AnuncioVeiculoDTO>> pesquisar(
 			@ApiParam("Palavras-chave a serem pesquisadas. ") @RequestParam(defaultValue ="") String q,
 			@ApiParam("Número da página (padrão é 0)") @RequestParam(defaultValue = "0") int p,
 			@ApiParam("Número de registros por página (padrão é 10)") @RequestParam(defaultValue = "10") int n) {
 		
-		List<AnuncioVeiculoDTO> searchResults = null;
+		Page<AnuncioVeiculoDTO> pagina = this.repositorioAnuncioVeiculo.pesquisar(q, n, p)
+				.map(v->v.toAnuncioVeiculoDTO());
 		
-		try {
-			searchResults = this.repositorioAnuncioVeiculo.pesquisar(q, n, p)
-					.stream().map(a-> a.toAnuncioVeiculoDTO())
-					.collect(Collectors.toList());;
-
-		} catch (Exception ex) {
-			// Nothing
-		}
-
-
-		return ResponseEntity.ok().body(searchResults);
+		
+		return ResponseEntity.ok().body(pagina);
 	}
+	
 	
 	@ApiOperation(value = "Retorna o anúncio de veículos pelo identificador") 
 	@ApiResponses({

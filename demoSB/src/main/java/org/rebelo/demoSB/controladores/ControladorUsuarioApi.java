@@ -43,24 +43,7 @@ public class ControladorUsuarioApi {
 		this.codificadorDeSenha = codificadorDeSenha;
 	}
 	
-	/*
-	//fake api para gerar documentação do swagger relativa a api de login implementada pelo Spring Security
-	@ApiOperation("Api para o login de usuários. Entrada no formato {\n" + 
-			"    \"cpf\": \"67681905049\",\n" + 
-			"    \"senha\": \"12345678\"\n" + 
-			"    \n" + 
-			"} e como resposta um token JWT caso autenticado com sucesso")
-	@ApiResponses({
-	    @ApiResponse(code = 200, message = "Usuário autenticado com sucesso; Retorna um token JWT no Header")
-	})
-	@PostMapping("/login")
-	public void fakeLogin(@ApiParam("cpf do usuário") @RequestParam String cpf, 
-			@ApiParam("senha do usuário") @RequestParam String senha) {
-	    throw new IllegalStateException("Este método é implementado pelo Spring Security.");
-	}
-	
-	*/
-	
+		
 	@ApiOperation(value = "Lista os usuários")
 	@ApiResponses({
 	    @ApiResponse(code = 200, message = "Sucesso")

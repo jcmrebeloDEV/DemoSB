@@ -2,6 +2,7 @@ package org.rebelo.demoSB.testesDeIntegracao;
 
 import org.junit.jupiter.api.Test;
 import org.rebelo.demoSB.entidade.Usuario;
+import org.rebelo.demoSB.DTO.LoginDTO;
 import org.rebelo.demoSB.entidade.AnuncioVeiculo;
 import org.rebelo.demoSB.entidade.Enum.Marca;
 import org.rebelo.demoSB.repositorio.RepositorioAnuncioVeiculo;
@@ -54,14 +55,12 @@ public class TestesIntegracaoAnuncioVeiculo {
 	//@Test
 	public String obterTokenJWT(String cpf, String password) throws Exception {
 
-		Usuario user = new Usuario();
-		user.setCpf(cpf);
-		user.setSenha(password);
-
+		LoginDTO login = new LoginDTO(cpf, password);
+		
 		ResultActions result = mockMvc
 				.perform(post("/usuarios/login/")
 				.contentType("application/json")
-				.content(objectMapper.writeValueAsString(user)))
+				.content(objectMapper.writeValueAsString(login)))
 				.andExpect(status().isOk());
 			
 		return result.andReturn().getResponse().getHeaderValue("Authorization").toString();
@@ -121,8 +120,8 @@ public class TestesIntegracaoAnuncioVeiculo {
 		mockMvc.perform(get("/anuncios/veiculos/pesquisar/?q={query}&p={pagina}&n={numeroRegistros}", "Roadster turbo", "0","10"))
 		.andExpect(status().isOk())
 		.andExpect(content().contentType("application/json"))
-		.andExpect(jsonPath("$", hasSize(2)))
-		.andExpect(jsonPath("$[0].marca", is(Marca.MERCEDES.toString())))
+		.andExpect(jsonPath("$.content", hasSize(2)))
+		.andExpect(jsonPath("$.content[0].marca", is(Marca.MERCEDES.toString())))
 		.andReturn();
 
 	}
